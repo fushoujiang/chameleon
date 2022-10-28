@@ -2,10 +2,15 @@ package org.fsj.chameleon.datasource.manager;
 
 
 
-public class LocalConfigManager extends AbsConfigManager {
+public class LocalConfigManager<T> extends AbsConfigManager<T> {
     @Override
-    public RateLimiterConfig loadFromDateSource(RateLimiterConfig rateLimiterConfig) {
-        return rateLimiterConfig;
+    public T loadFromDateSource(T t) {
+        return t;
+    }
+
+    @Override
+    public String buildCacheKey(T t) {
+        return t.toString();
     }
 
 }

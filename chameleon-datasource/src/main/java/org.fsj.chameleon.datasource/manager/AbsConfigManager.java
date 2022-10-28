@@ -1,9 +1,8 @@
 package org.fsj.chameleon.datasource.manager;
 
 
+import org.fsj.chameleon.datasource.manager.cache.AbsCacheFreshStore;
 import org.fsj.chameleon.datasource.manager.cache.CacheRefreshManager;
-import org.fsj.chameleon.datasource.manager.cache.CacheStore;
-import org.fsj.chameleon.lang.Refreshable;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,7 +11,7 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
     private CacheRefreshManager<List<T>> cacheRefreshManager = CacheRefreshManager.getInstance();
 
-    private CacheStore<T> cacheStore ;
+    private AbsCacheFreshStore<T> cacheFreshStore ;
     /**
      * 从数据源获取配置
      * @param t 配置
@@ -20,13 +19,21 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
      */
     public abstract T loadFromDateSource(T t);
 
+    /**
+     * 自定义自己cache
+     * @param t
+     * @return
+     */
+    public abstract String buildCacheKey(T t);
+
+
 
     @Override
     public T getConfig(T t) {
-         T result = cacheStore.get(t);
+         T result = cacheFreshStore.get(t);
         if (Objects.isNull(result)){
             result = loadFromDateSource(t);
-            cacheStore.put(result);
+            cacheFreshStore.put(result);
         }
         return result;
     }
@@ -38,8 +45,6 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
     @Override
     public void refresh(List<T> ts) {
-        if (cacheStore instanceof Refreshable<List<T>>){
-            ((Refreshable<?>) cacheStore).refresh(ts);
-        }
+        cacheFreshStore.refresh(ts);
     }
 }
