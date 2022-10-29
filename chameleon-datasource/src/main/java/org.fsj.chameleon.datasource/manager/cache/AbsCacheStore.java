@@ -7,10 +7,6 @@ public abstract class AbsCacheStore<T> implements CacheStore<T> {
 
     private  final Map<String,T> cache = new ConcurrentHashMap();
 
-    abstract T putCache(T t);
-
-
-    abstract T getCache(T t);
 
     abstract String buildCacheKey(T t);
 
