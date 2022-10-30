@@ -1,19 +1,22 @@
 package org.fsj.chameleon.lang.factory;
 
 import org.fsj.chameleon.lang.Refreshable;
-import org.fsj.chameleon.lang.cache.AbsCacheFreshStore;
+import org.fsj.chameleon.lang.cache.CacheFreshStore;
 import org.fsj.chameleon.lang.cache.CacheRefreshManager;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public abstract class AbsCacheFactory <T, P > implements CacheFactory<T,  P>,  Refreshable<Map<String,T>>  {
 
-    private CacheRefreshManager<List<FactoryParams<T>>> cacheRefreshManager = CacheRefreshManager.getInstance();
+    private  CacheRefreshManager<Map<String,T>> cacheRefreshManager = CacheRefreshManager.getInstance();
 
-    private AbsCacheFreshStore<T> cacheFreshStore ;
+    private CacheFreshStore<T> cacheFreshStore  = CacheFreshStore.getInstance();
 
+
+    public AbsCacheFactory() {
+        cacheRefreshManager.addRefreshListener(this);
+    }
 
     @Override
     public void refresh(Map<String, T> map) {

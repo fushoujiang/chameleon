@@ -1,9 +1,10 @@
 package org.fsj.chameleon.lang.convert;
 
-import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public interface Converter<A, B> {
      */
     default List<B> listForward(Collection<A> collection) {
         if (CollectionUtils.isEmpty(collection)) {
-            return Lists.newArrayList();
+            return Collections.EMPTY_LIST;
         }
         return collection.stream().map(this::doForward).collect(Collectors.toList());
     }
@@ -64,7 +65,7 @@ public interface Converter<A, B> {
      */
     default List<A> listBackward(Collection<B> collection) {
         if (CollectionUtils.isEmpty(collection)) {
-            return Lists.newArrayList();
+            return Collections.EMPTY_LIST;
         }
         return collection.stream().map(this::doBackward).collect(Collectors.toList());
     }

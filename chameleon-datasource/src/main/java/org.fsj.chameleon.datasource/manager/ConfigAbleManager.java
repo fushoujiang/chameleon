@@ -6,8 +6,9 @@ import org.fsj.chameleon.lang.ConfigManager;
 import org.fsj.chameleon.lang.Refreshable;
 
 import java.util.List;
+import java.util.Map;
 
-public interface ConfigAbleManager<T> extends ConfigManager<T>, Refreshable<List<T>>, ConfigChangeListener<List<T>> {
+public interface ConfigAbleManager<T> extends ConfigManager<T>, Refreshable<Map<String,T>>, ConfigChangeListener<Map<String,T>> {
 
 
 

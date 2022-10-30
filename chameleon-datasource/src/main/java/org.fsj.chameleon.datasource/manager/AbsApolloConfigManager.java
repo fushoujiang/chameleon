@@ -6,14 +6,16 @@ import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.google.common.base.Strings;
 import org.fsj.chameleon.lang.convert.Converter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public abstract class AbsApolloConfigManager<T> extends AbsConfigManager<T> implements ConfigChangeListener{
 
     private  Config config;
 
-    private Converter<List<T>,ConfigChangeEvent> apolloChangeConvert;
+    private Converter<ConfigChangeEvent,List<T>> apolloChangeConvert;
 
     private Converter<String ,T> configPropertyTConverter;
 
@@ -23,7 +25,12 @@ public abstract class AbsApolloConfigManager<T> extends AbsConfigManager<T> impl
 
     @Override
     public void onChange(ConfigChangeEvent configChangeEvent) {
-        callBack(apolloChangeConvert.doBackward(configChangeEvent));
+        final List<T> list =  apolloChangeConvert.doForward(configChangeEvent);
+        Map<String ,T> map = new HashMap<>(list.size());
+        list.forEach(config->{
+            map.put(buildCacheKey(config),config);
+        });
+        callBack(map);
     }
 
 

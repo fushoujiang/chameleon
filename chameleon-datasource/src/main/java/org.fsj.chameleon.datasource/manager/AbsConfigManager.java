@@ -1,17 +1,24 @@
 package org.fsj.chameleon.datasource.manager;
 
 
-import org.fsj.chameleon.datasource.manager.cache.AbsCacheFreshStore;
-import org.fsj.chameleon.datasource.manager.cache.CacheRefreshManager;
+import org.fsj.chameleon.lang.cache.CacheFreshStore;
+import org.fsj.chameleon.lang.cache.CacheRefreshManager;
+import org.fsj.chameleon.lang.factory.CacheFactoryParams;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
-    private CacheRefreshManager<List<T>> cacheRefreshManager = CacheRefreshManager.getInstance();
+    private CacheFactoryParams<T> cacheFactoryParams ;
 
-    private AbsCacheFreshStore<T> cacheFreshStore ;
+    public AbsConfigManager() {
+        cacheRefreshManager.addRefreshListener(this);
+    }
+    private CacheFreshStore<T> cacheFreshStore = CacheFreshStore.getInstance();
+
+    private CacheRefreshManager<Map<String,T>> cacheRefreshManager = CacheRefreshManager.getInstance();
     /**
      * 从数据源获取配置
      * @param t 配置
@@ -30,21 +37,21 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
     @Override
     public T getConfig(T t) {
-         T result = cacheFreshStore.get(t);
+         T result = cacheFreshStore.get(cacheFactoryParams.getCacheKey());
         if (Objects.isNull(result)){
             result = loadFromDateSource(t);
-            cacheFreshStore.put(result);
+            cacheFreshStore.put(cacheFactoryParams.getCacheKey(),t);
         }
         return result;
     }
 
     @Override
-    public void callBack(List<T> t) {
-        cacheRefreshManager.fresh(t);
+    public void callBack(Map<String ,T> map) {
+        cacheRefreshManager.fresh(map);
     }
 
     @Override
-    public void refresh(List<T> ts) {
-        cacheFreshStore.refresh(ts);
+    public void refresh(Map<String,T> map) {
+        cacheFreshStore.refresh(map);
     }
 }

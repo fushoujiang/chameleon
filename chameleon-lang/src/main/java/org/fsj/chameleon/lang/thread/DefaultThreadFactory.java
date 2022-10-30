@@ -9,11 +9,11 @@ public class DefaultThreadFactory implements ThreadFactory {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private String namePrefix;
 
-    public DefaultThreadFactory(String namePrefix) {
+    public DefaultThreadFactory(String prefix) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
                 Thread.currentThread().getThreadGroup();
-        namePrefix = "-pool-" +
+        namePrefix = prefix+"-pool-" +
                 poolNumber.getAndIncrement() +
                 "-thread-";
     }

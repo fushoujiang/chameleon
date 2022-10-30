@@ -6,7 +6,9 @@ import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 import org.fsj.chameleon.lang.convert.Converter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public abstract class AbsNacosConfigManager<T> extends AbsConfigManager<T> implements Listener {
@@ -38,6 +40,8 @@ public abstract class AbsNacosConfigManager<T> extends AbsConfigManager<T> imple
         return null;
     }
 
+    abstract String buildKey(T t);
+
     abstract String getDateId(T t);
     abstract String getGroup(T t);
 
@@ -53,7 +57,12 @@ public abstract class AbsNacosConfigManager<T> extends AbsConfigManager<T> imple
 
     @Override
     public void receiveConfigInfo(String configInfo) {
-        callBack(changeConvert.doForward(configInfo));
+        final List<T> list = changeConvert.doForward(configInfo);
+        Map<String ,T> map = new HashMap<>(list.size());
+        list.forEach(config->{
+            map.put(buildKey(config),config);
+        });
+        callBack(map);
     }
 
 }
