@@ -7,8 +7,14 @@ public class RateLimiterFactoryParams implements CacheFactoryParams<RateLimiterC
 
     private RateLimiterConfig rateLimitConfig;
 
-    public RateLimiterFactoryParams(RateLimiterConfig rateLimitConfig) {
+
+    public RateLimiterConfig getRateLimitConfig() {
+        return rateLimitConfig;
+    }
+
+    public RateLimiterFactoryParams setRateLimitConfig(RateLimiterConfig rateLimitConfig) {
         this.rateLimitConfig = rateLimitConfig;
+        return this;
     }
 
     @Override

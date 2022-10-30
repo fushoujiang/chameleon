@@ -1,5 +1,6 @@
 package org.fsj.chameleon.limit.factory;
 
+import org.fsj.chameleon.lang.ConfigManager;
 import org.fsj.chameleon.lang.factory.FactoryParams;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
 import org.fsj.chameleon.limit.limiter.CRateLimiter;
@@ -18,6 +19,11 @@ public class RedissonRateLimiterFactory extends AbsRateLimiterFactory {
         this.redisson = redisson;
     }
 
+
+    public RedissonRateLimiterFactory(ConfigManager<FactoryParams<RateLimiterConfig>> manager, RedissonClient redisson) {
+        super(manager);
+        this.redisson = redisson;
+    }
 
     @Override
     public CRateLimiter createRateLimiter(FactoryParams<RateLimiterConfig> params) {

@@ -5,7 +5,6 @@ import org.fsj.chameleon.lang.cache.CacheFreshStore;
 import org.fsj.chameleon.lang.cache.CacheRefreshManager;
 import org.fsj.chameleon.lang.factory.CacheFactoryParams;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -13,7 +12,8 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
     private CacheFactoryParams<T> cacheFactoryParams ;
 
-    public AbsConfigManager() {
+    public AbsConfigManager(CacheFactoryParams<T> cacheFactoryParams) {
+        this.cacheFactoryParams = cacheFactoryParams;
         cacheRefreshManager.addRefreshListener(this);
     }
     private CacheFreshStore<T> cacheFreshStore = CacheFreshStore.getInstance();
