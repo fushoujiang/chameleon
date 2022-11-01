@@ -15,6 +15,7 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
     public AbsConfigManager(CacheFactoryParams<T> cacheFactoryParams) {
         this.cacheFactoryParams = cacheFactoryParams;
         cacheRefreshManager.addRefreshListener(this);
+        cacheRefreshManager.addRefreshListener(cacheFreshStore);
     }
     private CacheFreshStore<T> cacheFreshStore = CacheFreshStore.getInstance();
 

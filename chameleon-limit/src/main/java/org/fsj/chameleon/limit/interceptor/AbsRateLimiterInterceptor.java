@@ -1,17 +1,16 @@
 package org.fsj.chameleon.limit.interceptor;
 
+import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.google.common.base.Strings;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.fsj.chameleon.datasource.manager.AbsConfigManager;
 import org.fsj.chameleon.limit.RateLimitException;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
 import org.fsj.chameleon.limit.factory.AbsRateLimiterFactory;
 import org.fsj.chameleon.limit.factory.GuavaRateLimiterFactory;
 import org.fsj.chameleon.limit.factory.params.RateLimiterFactoryParams;
 import org.fsj.chameleon.limit.limiter.CRateLimiter;
-import org.fsj.chameleon.limit.manager.ApolloConfigManger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +28,11 @@ public abstract class AbsRateLimiterInterceptor {
     private AbsRateLimiterFactory absRateLimiterFactory;
 
 
-
     public AbsRateLimiterInterceptor(AbsRateLimiterFactory rateLimiterFactory) {
         this.absRateLimiterFactory = rateLimiterFactory;
     }
-    public AbsRateLimiterInterceptor( ) {
+
+    public AbsRateLimiterInterceptor() {
         this.absRateLimiterFactory = new GuavaRateLimiterFactory();
     }
 
@@ -42,24 +41,17 @@ public abstract class AbsRateLimiterInterceptor {
         final RateLimiterConfig limiterConfig = rateLimiterFactoryParams.getCreateParams();
         final CRateLimiter rateLimiter = absRateLimiterFactory.get(rateLimiterFactoryParams);
 
-        if (Objects.isNull(rateLimiter)){
+        if (Objects.isNull(rateLimiter)) {
             LOGGER.debug("rateLimiterAround  no rateLimiter:{}", limiterConfig.getGroup());
             return point.proceed();
         }
         final String logKey = limiterConfig.getGroup();
-        LOGGER.debug("rateLimiterAround params:{}", limiterConfig);
-        if (limiterConfig.isWait()) {
-            //阻塞获取令牌
-            LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
-            rateLimiter.acquire();
-            LOGGER.debug("rateLimiterAround acquire got:{}", logKey);
-            return point.proceed();
-        }
-        //非阻塞获取令牌
-        LOGGER.debug("rateLimiterAround tryAcquire begin:{}", logKey);
-        if (rateLimiter.tryAcquire(limiterConfig.getTimeOut(), limiterConfig.getTimeOutUnit())) {
-            LOGGER.debug("rateLimiterAround tryAcquire got:{}", logKey);
-            return point.proceed();
+
+
+        try {
+            doAcquire(rateLimiter,limiterConfig,point);
+        }catch (FlowException flowException){
+            //ignore flowException 目前支持自己的限流降级，熔断相关的异常抛到上层处理，目前也不支持。
         }
         if (!Strings.isNullOrEmpty(limiterConfig.getFailBackMethod())) {
             LOGGER.debug("rateLimiterAround invoke failBackMethod:{}", logKey);
@@ -67,6 +59,19 @@ public abstract class AbsRateLimiterInterceptor {
         }
         LOGGER.debug("rateLimiterAround throw ex:{}", logKey);
         throw new RateLimitException("【method】" + point.getSignature().getName() + "【params】" + Arrays.toString(point.getArgs()) + "called times >" + limiterConfig.getPerSecond() + "be limited");
+    }
+
+
+    private boolean doAcquire(CRateLimiter rateLimiter, RateLimiterConfig limiterConfig, ProceedingJoinPoint point) throws Throwable {
+        final String logKey = limiterConfig.getGroup();
+        if (limiterConfig.isWait()) {
+            //阻塞获取令牌
+            LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
+            rateLimiter.acquire();
+            LOGGER.debug("rateLimiterAround acquire got:{}", logKey);
+            return true;
+        }
+        return rateLimiter.tryAcquire(limiterConfig.getTimeOut(), limiterConfig.getTimeOutUnit());
     }
 
 
@@ -96,7 +101,7 @@ public abstract class AbsRateLimiterInterceptor {
 
 
     protected Object invokeFallbackMethod(ProceedingJoinPoint joinPoint, String fallback) {
-        if ("nullFallbackMethod".equals(fallback)){
+        if ("nullFallbackMethod".equals(fallback)) {
             return null;
         }
         Method method = findFallbackMethod(joinPoint, fallback);

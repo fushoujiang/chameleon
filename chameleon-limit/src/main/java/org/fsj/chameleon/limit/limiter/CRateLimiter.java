@@ -1,11 +1,12 @@
 package org.fsj.chameleon.limit.limiter;
 
+
 import java.util.concurrent.TimeUnit;
 
 public interface CRateLimiter {
 
-    boolean tryAcquire(long timeout, TimeUnit unit);
+    boolean tryAcquire(long timeout, TimeUnit unit) throws Exception;
 
-    void acquire();
+    void acquire() throws Exception;
 
 }

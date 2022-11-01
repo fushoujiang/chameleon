@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LimitServiceImpl {
 
-    @RateLimitAnnotation(group = "test")
+    @RateLimitAnnotation(group = "test",key = "key" ,perSecond = 1)
     public boolean limit(String name, String mobile) {
         Thread thread  = Thread.currentThread();
         System.out.println(thread.getName()+"name:"+name+"mobile:"+mobile);
