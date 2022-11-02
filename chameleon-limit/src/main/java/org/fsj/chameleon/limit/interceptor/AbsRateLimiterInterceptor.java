@@ -2,6 +2,7 @@ package org.fsj.chameleon.limit.interceptor;
 
 import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.google.common.base.Strings;
+import org.apache.commons.collections.CollectionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -14,10 +15,12 @@ import org.fsj.chameleon.limit.limiter.CRateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.*;
+import javax.management.monitor.GaugeMonitor;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 
@@ -47,11 +50,12 @@ public abstract class AbsRateLimiterInterceptor {
         }
         final String logKey = limiterConfig.getGroup();
 
-
         try {
-            doAcquire(rateLimiter,limiterConfig,point);
+            LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
+            doAcquire(rateLimiter,limiterConfig);
+            LOGGER.debug("rateLimiterAround acquire end:{}", logKey);
         }catch (FlowException flowException){
-            //ignore flowException 目前支持自己的限流降级，熔断相关的异常抛到上层处理，目前也不支持。
+            //ignore flowException 目前支持自己的限流降级，熔断相关的异常抛到上层处理，目前不处理。
         }
         if (!Strings.isNullOrEmpty(limiterConfig.getFailBackMethod())) {
             LOGGER.debug("rateLimiterAround invoke failBackMethod:{}", logKey);
@@ -62,11 +66,10 @@ public abstract class AbsRateLimiterInterceptor {
     }
 
 
-    private boolean doAcquire(CRateLimiter rateLimiter, RateLimiterConfig limiterConfig, ProceedingJoinPoint point) throws Throwable {
+    private boolean doAcquire(CRateLimiter rateLimiter, RateLimiterConfig limiterConfig) throws Throwable {
         final String logKey = limiterConfig.getGroup();
         if (limiterConfig.isWait()) {
             //阻塞获取令牌
-            LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
             rateLimiter.acquire();
             LOGGER.debug("rateLimiterAround acquire got:{}", logKey);
             return true;
@@ -84,33 +87,27 @@ public abstract class AbsRateLimiterInterceptor {
      */
     public abstract RateLimiterFactoryParams params2RateLimiterConfig(ProceedingJoinPoint point, Annotation annotation);
 
-    protected Method findFallbackMethod(ProceedingJoinPoint joinPoint, String fallbackMethodName) {
+    protected Method findFallbackMethod(ProceedingJoinPoint joinPoint, String fallbackMethodName) throws NoSuchMethodException{
         Signature signature = joinPoint.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
         Method method = methodSignature.getMethod();
         Class<?>[] parameterTypes = method.getParameterTypes();
-        Method fallbackMethod = null;
-        try {
-            //这里通过判断必须取和原方法一样参数的fallback方法
-            fallbackMethod = joinPoint.getTarget().getClass().getMethod(fallbackMethodName, parameterTypes);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return fallbackMethod;
+        //这里通过判断必须取和原方法一样参数的fallback方法
+        return joinPoint.getTarget().getClass().getMethod(fallbackMethodName, parameterTypes);
     }
 
+    public static final String NULL_FALLBACK_METHOD = "nullFallbackMethod";
+    public static final String EMPTY_FALLBACK_METHOD = "emptyFallbackMethod";
 
-    protected Object invokeFallbackMethod(ProceedingJoinPoint joinPoint, String fallback) {
-        if ("nullFallbackMethod".equals(fallback)) {
+    protected Object invokeFallbackMethod(ProceedingJoinPoint joinPoint, String fallback) throws Exception {
+        if (NULL_FALLBACK_METHOD.equals(fallback)) {
             return null;
+        }
+        if (EMPTY_FALLBACK_METHOD.equals(fallback)) {
+            return Collections.EMPTY_LIST;
         }
         Method method = findFallbackMethod(joinPoint, fallback);
         method.setAccessible(true);
-        try {
-            Object invoke = method.invoke(joinPoint.getTarget(), joinPoint.getArgs());
-            return invoke;
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RateLimitException(e);
-        }
+        return method.invoke(joinPoint.getTarget(), joinPoint.getArgs());
     }
 }
