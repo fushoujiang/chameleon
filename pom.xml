@@ -84,13 +84,11 @@
                 <artifactId>cglib-nodep</artifactId>
                 <version>2.2.2</version>
             </dependency>
-            <dependencies>
-                <dependency>
-                    <groupId>org.fsj</groupId>
-                    <artifactId>chameleon-lang</artifactId>
-                    <version>1.0.0-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
+            <dependency>
+                <groupId>org.fsj</groupId>
+                <artifactId>chameleon-lang</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
             <dependency>
                 <artifactId>fastjson</artifactId>
                 <groupId>com.alibaba</groupId>

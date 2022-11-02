@@ -19,7 +19,6 @@
         <dependency>
             <groupId>org.fsj</groupId>
             <artifactId>chameleon-lang</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
