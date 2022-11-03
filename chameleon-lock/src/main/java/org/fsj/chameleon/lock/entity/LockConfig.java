@@ -21,10 +21,21 @@ public class LockConfig {
     private int timeout;
 
     /**
-     * lock 前缀
+     * 公平/非公平
+     */
+    private boolean fair;
+    /**
+     * lock 项目名称，单个集群保证唯一
+     */
+    private String project;
+    /**
+     * lock 前缀需要保持唯一，若无则以方法名
      */
     private String lockPrefix;
-
+    /**
+     * 参数拼接好的key
+     */
+    private String paramsKey;
     /**
      * 失败之后执行本类的方法名,若无则抛异常
      * <p>
@@ -60,6 +71,15 @@ public class LockConfig {
         return this;
     }
 
+    public String getProject() {
+        return project;
+    }
+
+    public LockConfig setProject(String project) {
+        this.project = project;
+        return this;
+    }
+
     public String getLockPrefix() {
         return lockPrefix;
     }
@@ -75,6 +95,24 @@ public class LockConfig {
 
     public LockConfig setLockFailMethod(String lockFailMethod) {
         this.lockFailMethod = lockFailMethod;
+        return this;
+    }
+
+    public boolean isFair() {
+        return fair;
+    }
+
+    public LockConfig setFair(boolean fair) {
+        this.fair = fair;
+        return this;
+    }
+
+    public String getParamsKey() {
+        return paramsKey;
+    }
+
+    public LockConfig setParamsKey(String paramsKey) {
+        this.paramsKey = paramsKey;
         return this;
     }
 }

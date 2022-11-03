@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.fsj.chameleon.lang.util.FallBackUtil;
 import org.fsj.chameleon.limit.RateLimitException;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
 import org.fsj.chameleon.limit.factory.AbsRateLimiterFactory;
@@ -59,7 +60,7 @@ public abstract class AbsRateLimiterInterceptor {
         }
         if (!Strings.isNullOrEmpty(limiterConfig.getFailBackMethod())) {
             LOGGER.debug("rateLimiterAround invoke failBackMethod:{}", logKey);
-            return invokeFallbackMethod(point, limiterConfig.getFailBackMethod());
+            return FallBackUtil.invokeFallbackMethod(point, limiterConfig.getFailBackMethod());
         }
         LOGGER.debug("rateLimiterAround throw ex:{}", logKey);
         throw new RateLimitException("【method】" + point.getSignature().getName() + "【params】" + Arrays.toString(point.getArgs()) + "called times >" + limiterConfig.getPerSecond() + "be limited");
@@ -87,27 +88,5 @@ public abstract class AbsRateLimiterInterceptor {
      */
     public abstract RateLimiterFactoryParams params2RateLimiterConfig(ProceedingJoinPoint point, Annotation annotation);
 
-    protected Method findFallbackMethod(ProceedingJoinPoint joinPoint, String fallbackMethodName) throws NoSuchMethodException{
-        Signature signature = joinPoint.getSignature();
-        MethodSignature methodSignature = (MethodSignature) signature;
-        Method method = methodSignature.getMethod();
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        //这里通过判断必须取和原方法一样参数的fallback方法
-        return joinPoint.getTarget().getClass().getMethod(fallbackMethodName, parameterTypes);
-    }
 
-    public static final String NULL_FALLBACK_METHOD = "nullFallbackMethod";
-    public static final String EMPTY_FALLBACK_METHOD = "emptyFallbackMethod";
-
-    protected Object invokeFallbackMethod(ProceedingJoinPoint joinPoint, String fallback) throws Exception {
-        if (NULL_FALLBACK_METHOD.equals(fallback)) {
-            return null;
-        }
-        if (EMPTY_FALLBACK_METHOD.equals(fallback)) {
-            return Collections.EMPTY_LIST;
-        }
-        Method method = findFallbackMethod(joinPoint, fallback);
-        method.setAccessible(true);
-        return method.invoke(joinPoint.getTarget(), joinPoint.getArgs());
-    }
 }
