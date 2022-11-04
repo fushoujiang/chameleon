@@ -51,13 +51,10 @@ public abstract class AbsRateLimiterInterceptor {
         }
         final String logKey = limiterConfig.getGroup();
 
-        try {
-            LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
-            doAcquire(rateLimiter,limiterConfig);
-            LOGGER.debug("rateLimiterAround acquire end:{}", logKey);
-        }catch (FlowException flowException){
-            //ignore flowException 目前支持自己的限流降级，熔断相关的异常抛到上层处理，目前不处理。
-        }
+        LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
+        doAcquire(rateLimiter, limiterConfig);
+        LOGGER.debug("rateLimiterAround acquire end:{}", logKey);
+
         if (!Strings.isNullOrEmpty(limiterConfig.getFailBackMethod())) {
             LOGGER.debug("rateLimiterAround invoke failBackMethod:{}", logKey);
             return FallBackUtil.invokeFallbackMethod(point, limiterConfig.getFailBackMethod());

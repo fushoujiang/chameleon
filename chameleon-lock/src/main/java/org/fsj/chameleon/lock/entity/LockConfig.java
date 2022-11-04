@@ -10,7 +10,6 @@ public class LockConfig {
      * 要加锁的key的index，标识key所在的参数位置
      */
     private int[] keyIndexes;
-
     /**
      * 获取锁超时等待时间，单位为毫秒。
      *
@@ -32,10 +31,7 @@ public class LockConfig {
      * lock 前缀需要保持唯一，若无则以方法名
      */
     private String lockPrefix;
-    /**
-     * 参数拼接好的key
-     */
-    private String paramsKey;
+
     /**
      * 失败之后执行本类的方法名,若无则抛异常
      * <p>
@@ -44,6 +40,13 @@ public class LockConfig {
      */
     private String lockFailMethod;
 
+
+    /**
+     * 最终key=lockPrefix+keys解析参数
+     */
+    private String lockKey;
+
+
     public String[] getKeys() {
         return keys;
     }
@@ -51,6 +54,15 @@ public class LockConfig {
     public LockConfig setKeys(String[] keys) {
         this.keys = keys;
         return this;
+    }
+
+
+    public String getLockKey() {
+        return lockKey;
+    }
+
+    public void setLockKey(String lockKey) {
+        this.lockKey = lockKey;
     }
 
     public int[] getKeyIndexes() {
@@ -107,12 +119,4 @@ public class LockConfig {
         return this;
     }
 
-    public String getParamsKey() {
-        return paramsKey;
-    }
-
-    public LockConfig setParamsKey(String paramsKey) {
-        this.paramsKey = paramsKey;
-        return this;
-    }
 }
