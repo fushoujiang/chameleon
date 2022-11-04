@@ -23,6 +23,7 @@
         <module>chameleon-threadpool</module>
         <module>chameleon-lock</module>
         <module>chameleon-monitor</module>
+        <module>chameleon-example</module>
     </modules>
     <dependencyManagement>
 
