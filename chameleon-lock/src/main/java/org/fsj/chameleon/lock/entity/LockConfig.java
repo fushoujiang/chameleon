@@ -28,7 +28,7 @@ public class LockConfig {
     /**
      * 失败之后执行本类的方法名,若无则抛异常
      * <p>
-     *     入参和返回值和增强方法需保持一致
+     * 入参和返回值和增强方法需保持一致
      * </p>
      */
     private String lockFailMethod;
