@@ -10,7 +10,6 @@ public class LockConfig {
      * 要加锁的key的index，标识key所在的参数位置
      */
     private int[] keyIndexes;
-
     /**
      * 获取锁超时等待时间，单位为毫秒。
      *
@@ -21,7 +20,15 @@ public class LockConfig {
     private int timeout;
 
     /**
-     * lock 前缀
+     * 公平/非公平
+     */
+    private boolean fair;
+    /**
+     * lock 项目名称，单个集群保证唯一
+     */
+    private String project;
+    /**
+     * lock 前缀需要保持唯一，若无则以方法名
      */
     private String lockPrefix;
 
@@ -33,6 +40,13 @@ public class LockConfig {
      */
     private String lockFailMethod;
 
+
+    /**
+     * 最终key=lockPrefix+keys解析参数
+     */
+    private String lockKey;
+
+
     public String[] getKeys() {
         return keys;
     }
@@ -40,6 +54,15 @@ public class LockConfig {
     public LockConfig setKeys(String[] keys) {
         this.keys = keys;
         return this;
+    }
+
+
+    public String getLockKey() {
+        return lockKey;
+    }
+
+    public void setLockKey(String lockKey) {
+        this.lockKey = lockKey;
     }
 
     public int[] getKeyIndexes() {
@@ -60,6 +83,15 @@ public class LockConfig {
         return this;
     }
 
+    public String getProject() {
+        return project;
+    }
+
+    public LockConfig setProject(String project) {
+        this.project = project;
+        return this;
+    }
+
     public String getLockPrefix() {
         return lockPrefix;
     }
@@ -77,4 +109,14 @@ public class LockConfig {
         this.lockFailMethod = lockFailMethod;
         return this;
     }
+
+    public boolean isFair() {
+        return fair;
+    }
+
+    public LockConfig setFair(boolean fair) {
+        this.fair = fair;
+        return this;
+    }
+
 }
