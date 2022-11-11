@@ -13,7 +13,7 @@ import javax.management.monitor.GaugeMonitor;
 @Service
 public class LimitServiceImpl {
 
-    @RateLimitAnnotation(group = "test",key = "key" ,perSecond = 1)
+    @RateLimitAnnotation(group = "test",key = "key" ,perSecond = 1,isWait = true)
     public boolean limit(String name, String mobile) {
         Thread thread  = Thread.currentThread();
         System.out.println(thread.getName()+"name:"+name+"mobile:"+mobile);

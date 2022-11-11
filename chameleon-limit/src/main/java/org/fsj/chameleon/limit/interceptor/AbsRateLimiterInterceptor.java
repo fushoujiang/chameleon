@@ -53,6 +53,7 @@ public abstract class AbsRateLimiterInterceptor {
         try {
             LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
             doAcquire(rateLimiter,limiterConfig);
+)
             LOGGER.debug("rateLimiterAround acquire end:{}", logKey);
         }catch (FlowException flowException){
             //ignore flowException 目前支持自己的限流降级，熔断相关的异常抛到上层处理，目前不处理。
