@@ -4,6 +4,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 
@@ -21,7 +22,7 @@ public class FallBackUtil {
     private static final String NULL_FALLBACK_METHOD = "nullFallbackMethod";
     private static final String EMPTY_FALLBACK_METHOD = "emptyFallbackMethod";
 
-    public static Object invokeFallbackMethod(ProceedingJoinPoint joinPoint, String fallback) throws Exception {
+    public static Object invokeFallbackMethod(ProceedingJoinPoint joinPoint, String fallback) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if (NULL_FALLBACK_METHOD.equals(fallback)) {
             return null;
         }

@@ -1,5 +1,7 @@
 package org.fsj.chameleon.limit.interceptor;
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,21 +39,20 @@ public class RateLimitInterceptorTest {
      * Method: around(ProceedingJoinPoint point, RateLimitAnnotation rateLimitAnnotation)
      */
     @Test
-    public void testAround() throws Exception {
+    public void testAround()  {
        LimitServiceImpl limitServiceImpl= context.getBean(LimitServiceImpl.class);
 
-        new Thread(() -> {
-            for (int i=0;i<100;i++){
-                limitServiceImpl.limit(i+"",i+"");
-            }
-        }).start();
-        new Thread(() -> {
-            for (int i=0;i<100;i++){
-                limitServiceImpl.limit(i+"",i+"");
-            }
-        }).start();
+
+
+
+
+
         for (int i=0;i<100;i++){
-            limitServiceImpl.limit(i+"",i+"");
+            try {
+                limitServiceImpl.limit(i+"",i+"");
+            }catch (Throwable e){
+                e.printStackTrace();
+            }
         }
 
 

@@ -31,8 +31,9 @@ public class SentinelRateLimiter implements CRateLimiter {
         try  {
             entry = SphU.entry(sourceName);
         }finally {
-            assert entry != null;
-            entry.exit();
+            if (entry!=null){
+                entry.exit();
+            }
         }
     }
 

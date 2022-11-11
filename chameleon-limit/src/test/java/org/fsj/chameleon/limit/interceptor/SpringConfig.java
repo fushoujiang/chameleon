@@ -4,6 +4,7 @@ import org.fsj.chameleon.lang.ConfigManager;
 import org.fsj.chameleon.limit.factory.AbsRateLimiterFactory;
 import org.fsj.chameleon.limit.factory.GuavaRateLimiterFactory;
 import org.fsj.chameleon.limit.factory.RedissonRateLimiterFactory;
+import org.fsj.chameleon.limit.factory.SentinelRateLimiterFactory;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -18,15 +19,15 @@ public class SpringConfig {
 
 
     @Bean
-    public RateLimitInterceptor rateLimitInterceptor(){
-        return new RateLimitInterceptor();
+    public RateLimitInterceptor rateLimitInterceptor(AbsRateLimiterFactory rateLimiterFactory){
+        return new RateLimitInterceptor(rateLimiterFactory);
     }
 
 
 
     @Bean
-    public GuavaRateLimiterFactory rateLimiterFactory(){
-        return new GuavaRateLimiterFactory();
+    public AbsRateLimiterFactory rateLimiterFactory(){
+        return new SentinelRateLimiterFactory();
     }
 
 

@@ -1,11 +1,10 @@
 package org.fsj.chameleon.limit.interceptor;
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.google.common.base.Strings;
-import org.apache.commons.collections.CollectionUtils;
+import com.google.common.base.Throwables;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.fsj.chameleon.lang.util.FallBackUtil;
 import org.fsj.chameleon.limit.RateLimitException;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
@@ -16,12 +15,8 @@ import org.fsj.chameleon.limit.limiter.CRateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.*;
-import javax.management.monitor.GaugeMonitor;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 
 
@@ -40,31 +35,31 @@ public abstract class AbsRateLimiterInterceptor {
         this.absRateLimiterFactory = new GuavaRateLimiterFactory();
     }
 
-    public Object rateLimiterAround(ProceedingJoinPoint point, Annotation annotation) throws Throwable {
+    public Object rateLimiterAround(ProceedingJoinPoint point, Annotation annotation) throws FlowException, Throwable {
         final RateLimiterFactoryParams rateLimiterFactoryParams = params2RateLimiterConfig(point, annotation);
         final RateLimiterConfig limiterConfig = rateLimiterFactoryParams.getCreateParams();
         final CRateLimiter rateLimiter = absRateLimiterFactory.get(rateLimiterFactoryParams);
 
-        if (Objects.isNull(rateLimiter)) {
-            LOGGER.debug("rateLimiterAround  no rateLimiter:{}", limiterConfig.getGroup());
-            return point.proceed();
+        if (Objects.nonNull(rateLimiter)) {
+            final String logKey = limiterConfig.getGroup();
+            LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
+            final boolean acquire = doAcquire(rateLimiter, limiterConfig);
+            LOGGER.debug("rateLimiterAround acquire end:{},acquire:{}", logKey, acquire);
+            if (!acquire) {
+                if (!Strings.isNullOrEmpty(limiterConfig.getFailBackMethod())) {
+                    LOGGER.debug("rateLimiterAround invoke failBackMethod:{}", logKey);
+                    return FallBackUtil.invokeFallbackMethod(point, limiterConfig.getFailBackMethod());
+                }
+                LOGGER.debug("rateLimiterAround throw ex:{}", logKey);
+                throw new RateLimitException("【method】" + point.getSignature().getName() + "【params】" + Arrays.toString(point.getArgs()) + "called times >" + limiterConfig.getPerSecond() + "be limited");
+            }
         }
-        final String logKey = limiterConfig.getGroup();
+        return point.proceed();
 
-        LOGGER.debug("rateLimiterAround acquire begin:{}", logKey);
-        doAcquire(rateLimiter, limiterConfig);
-        LOGGER.debug("rateLimiterAround acquire end:{}", logKey);
-
-        if (!Strings.isNullOrEmpty(limiterConfig.getFailBackMethod())) {
-            LOGGER.debug("rateLimiterAround invoke failBackMethod:{}", logKey);
-            return FallBackUtil.invokeFallbackMethod(point, limiterConfig.getFailBackMethod());
-        }
-        LOGGER.debug("rateLimiterAround throw ex:{}", logKey);
-        throw new RateLimitException("【method】" + point.getSignature().getName() + "【params】" + Arrays.toString(point.getArgs()) + "called times >" + limiterConfig.getPerSecond() + "be limited");
     }
 
 
-    private boolean doAcquire(CRateLimiter rateLimiter, RateLimiterConfig limiterConfig) throws Throwable {
+    private boolean doAcquire(CRateLimiter rateLimiter, RateLimiterConfig limiterConfig) throws BlockException {
         final String logKey = limiterConfig.getGroup();
         if (limiterConfig.isWait()) {
             //阻塞获取令牌
