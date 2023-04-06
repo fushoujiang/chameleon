@@ -4,11 +4,11 @@ package org.fsj.chameleon.lock.interceptor;
 import com.google.common.base.Strings;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.fsj.chameleon.lang.factory.Factory;
 import org.fsj.chameleon.lang.util.FallBackUtil;
 import org.fsj.chameleon.lock.LockFailException;
 import org.fsj.chameleon.lock.entity.LockConfig;
 import org.fsj.chameleon.lock.factory.AbsLockFactory;
-import org.fsj.chameleon.lock.factory.LockConfigFactoryParams;
 import org.fsj.chameleon.lock.factory.RedissonLockFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,22 +19,21 @@ import java.util.concurrent.locks.Lock;
 public abstract class AbsLockInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbsLockInterceptor.class);
 
-    private AbsLockFactory absLockFactory;
+    private Factory<LockConfig,Lock> factory;
 
     public AbsLockInterceptor(AbsLockFactory absLockFactory) {
-        this.absLockFactory = absLockFactory;
+        this.factory = absLockFactory;
     }
     public AbsLockInterceptor() {
-        this.absLockFactory = new RedissonLockFactory();
+        this.factory = new RedissonLockFactory();
     }
 
     public Object lockAround(ProceedingJoinPoint joinPoint, Annotation annotation) throws Throwable{
-        final LockConfigFactoryParams lockConfigEntity = params2LockConfig(joinPoint,annotation);
+        final LockConfig lockConfig = params2LockConfig(joinPoint,annotation);
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        final LockConfig lockConfig = lockConfigEntity.getLockConfig();
         final String lockFailMethod = lockConfig.getLockFailMethod();
         final String lockKey = lockConfig.getLockKey();
-        Lock lock = absLockFactory.get(lockConfigEntity);
+        Lock lock = factory.get(lockConfig);
         if(lock.tryLock(lockConfig.getTimeout(),TimeUnit.MILLISECONDS)){
             LOGGER.info("{}-{}, get lock success:{}", joinPoint.getTarget().getClass().getName(), methodSignature.getName(), lockKey);
             try {
@@ -56,7 +55,7 @@ public abstract class AbsLockInterceptor {
      * @param annotation
      * @return
      */
-    public abstract LockConfigFactoryParams params2LockConfig(ProceedingJoinPoint joinPoint, Annotation annotation);
+    public abstract LockConfig params2LockConfig(ProceedingJoinPoint joinPoint, Annotation annotation);
 
 
 

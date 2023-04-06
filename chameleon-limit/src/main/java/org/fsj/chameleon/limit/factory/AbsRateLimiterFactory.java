@@ -1,40 +1,44 @@
 package org.fsj.chameleon.limit.factory;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.fsj.chameleon.datasource.manager.AbsConfigManager;
+import org.fsj.chameleon.datasource.manager.LocalConfigManager;
 import org.fsj.chameleon.lang.ConfigManager;
 import org.fsj.chameleon.lang.factory.AbsCacheFactory;
-import org.fsj.chameleon.lang.factory.FactoryParams;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
 import org.fsj.chameleon.limit.limiter.CRateLimiter;
-import org.fsj.chameleon.limit.manager.NacosConfigManger;
 
 
-public abstract class AbsRateLimiterFactory extends AbsCacheFactory<CRateLimiter, RateLimiterConfig> {
+
+public abstract class AbsRateLimiterFactory extends AbsCacheFactory<RateLimiterConfig,CRateLimiter> {
+
+    private ConfigManager<RateLimiterConfig> manager;
 
 
-    public AbsRateLimiterFactory(ConfigManager<FactoryParams<RateLimiterConfig>> manager) {
+    public AbsRateLimiterFactory(ConfigManager<RateLimiterConfig> manager) {
         this.manager = manager;
     }
 
     public AbsRateLimiterFactory() {
+        manager = new LocalConfigManager<>();
     }
 
-    private ConfigManager<FactoryParams<RateLimiterConfig>> manager;
 
-    public abstract CRateLimiter createRateLimiter(FactoryParams<RateLimiterConfig> params);
+    public abstract CRateLimiter createRateLimiter(RateLimiterConfig config);
+
 
     @Override
-    public CRateLimiter create(FactoryParams<RateLimiterConfig> params) {
-        checkArguments(params.getCreateParams());
-        if (manager != null) {
-            final FactoryParams<RateLimiterConfig> config = manager.getConfig(params);
-            checkArguments(config.getCreateParams());
-            return createRateLimiter(config);
-        }
-        return createRateLimiter(params);
+    public CRateLimiter create(RateLimiterConfig rateLimiterConfig) {
+        checkArguments(rateLimiterConfig);
+        final RateLimiterConfig config = manager.getConfig(rateLimiterConfig);
+        checkArguments(config);
+        return createRateLimiter(config);
+
+    }
+
+    @Override
+    public String getCacheKey(RateLimiterConfig rateLimiterConfig) {
+        return rateLimiterConfig.getKey();
     }
 
 

@@ -40,8 +40,16 @@ public class ZookeeperLockFactory extends AbsLockFactory{
         }
         throw new IllegalStateException("error start zk Lock factory");
     }
+
+
     @Override
-    public Lock createLock(FactoryParams<LockConfig> params) {
-        return new ZookeeperLock(client,ZKPaths.makePath(ROOT,params.getCreateParams().getLockKey()));
+    public Lock create(LockConfig lockConfig) {
+        return new ZookeeperLock(client,ZKPaths.makePath(ROOT,lockConfig.getLockKey()));
     }
+
+    @Override
+    public String getCacheKey(LockConfig lockConfig) {
+        return lockConfig.getLockKey();
+    }
+
 }

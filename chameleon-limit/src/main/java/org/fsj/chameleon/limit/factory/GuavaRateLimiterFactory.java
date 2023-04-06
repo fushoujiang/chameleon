@@ -11,7 +11,7 @@ import org.fsj.chameleon.limit.limiter.GuavaRateLimiter;
 public class GuavaRateLimiterFactory extends AbsRateLimiterFactory {
 
 
-    public GuavaRateLimiterFactory(ConfigManager<FactoryParams<RateLimiterConfig>> manager) {
+    public GuavaRateLimiterFactory(ConfigManager<RateLimiterConfig> manager) {
         super(manager);
     }
 
@@ -19,8 +19,7 @@ public class GuavaRateLimiterFactory extends AbsRateLimiterFactory {
     }
 
     @Override
-    public CRateLimiter createRateLimiter(FactoryParams<RateLimiterConfig> params) {
-        return new GuavaRateLimiter(RateLimiter.create(params.getCreateParams().getPerSecond()));
+    public CRateLimiter createRateLimiter(RateLimiterConfig params) {
+        return new GuavaRateLimiter(RateLimiter.create(params.getPerSecond()));
     }
-
 }

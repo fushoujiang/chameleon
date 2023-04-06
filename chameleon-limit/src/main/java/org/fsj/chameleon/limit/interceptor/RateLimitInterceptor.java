@@ -8,7 +8,6 @@ import org.fsj.chameleon.limit.RateLimitAnnotation;
 import org.fsj.chameleon.limit.RateLimitException;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
 import org.fsj.chameleon.limit.factory.AbsRateLimiterFactory;
-import org.fsj.chameleon.limit.factory.params.RateLimiterFactoryParams;
 import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -32,7 +31,7 @@ public class RateLimitInterceptor extends AbsRateLimiterInterceptor {
     }
 
     @Override
-    public RateLimiterFactoryParams params2RateLimiterConfig(ProceedingJoinPoint point, Annotation annotation) {
+    public RateLimiterConfig params2RateLimiterConfig(ProceedingJoinPoint point, Annotation annotation) {
         RateLimitAnnotation rateLimitAnnotation = (RateLimitAnnotation) annotation;
         String key = rateLimitAnnotation.key();
         String group = rateLimitAnnotation.group();
@@ -49,14 +48,14 @@ public class RateLimitInterceptor extends AbsRateLimiterInterceptor {
         if (key.length() > MAX_KEY_LENGTH) {
             key = key.substring(key.length() - MAX_KEY_LENGTH);
         }
-        return new RateLimiterFactoryParams(new RateLimiterConfig().setCluster(rateLimitAnnotation.cluster())
+        return new RateLimiterConfig().setCluster(rateLimitAnnotation.cluster())
                 .setFailBackMethod(rateLimitAnnotation.failBackMethod())
                 .setTimeOut(rateLimitAnnotation.timeOut())
                 .setTimeOutUnit(rateLimitAnnotation.timeOutUnit())
                 .setPerSecond(rateLimitAnnotation.perSecond())
                 .setWait(rateLimitAnnotation.isWait())
                 .setKey(key)
-                .setGroup(group));
+                .setGroup(group);
 
     }
 }

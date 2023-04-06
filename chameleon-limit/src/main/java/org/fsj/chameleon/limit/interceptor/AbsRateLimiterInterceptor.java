@@ -3,14 +3,12 @@ package org.fsj.chameleon.limit.interceptor;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.fsj.chameleon.lang.factory.Factory;
 import org.fsj.chameleon.lang.util.FallBackUtil;
 import org.fsj.chameleon.limit.RateLimitException;
 import org.fsj.chameleon.limit.entity.RateLimiterConfig;
-import org.fsj.chameleon.limit.factory.AbsRateLimiterFactory;
 import org.fsj.chameleon.limit.factory.GuavaRateLimiterFactory;
-import org.fsj.chameleon.limit.factory.params.RateLimiterFactoryParams;
 import org.fsj.chameleon.limit.limiter.CRateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,21 +22,20 @@ public abstract class AbsRateLimiterInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbsRateLimiterInterceptor.class);
 
-    private AbsRateLimiterFactory absRateLimiterFactory;
+    private Factory<RateLimiterConfig,CRateLimiter> rateLimiterFactory;
 
 
-    public AbsRateLimiterInterceptor(AbsRateLimiterFactory rateLimiterFactory) {
-        this.absRateLimiterFactory = rateLimiterFactory;
+    public AbsRateLimiterInterceptor(Factory<RateLimiterConfig,CRateLimiter> rateLimiterFactory) {
+        this.rateLimiterFactory = rateLimiterFactory;
     }
-
     public AbsRateLimiterInterceptor() {
-        this.absRateLimiterFactory = new GuavaRateLimiterFactory();
+        this.rateLimiterFactory = new GuavaRateLimiterFactory();
     }
+
 
     public Object rateLimiterAround(ProceedingJoinPoint point, Annotation annotation) throws FlowException, Throwable {
-        final RateLimiterFactoryParams rateLimiterFactoryParams = params2RateLimiterConfig(point, annotation);
-        final RateLimiterConfig limiterConfig = rateLimiterFactoryParams.getCreateParams();
-        final CRateLimiter rateLimiter = absRateLimiterFactory.get(rateLimiterFactoryParams);
+        final RateLimiterConfig limiterConfig = params2RateLimiterConfig(point, annotation);
+        final CRateLimiter rateLimiter = rateLimiterFactory.get(limiterConfig);
 
         if (Objects.nonNull(rateLimiter)) {
             final String logKey = limiterConfig.getGroup();
@@ -78,7 +75,7 @@ public abstract class AbsRateLimiterInterceptor {
      * @param annotation
      * @return
      */
-    public abstract RateLimiterFactoryParams params2RateLimiterConfig(ProceedingJoinPoint point, Annotation annotation);
+    public abstract RateLimiterConfig params2RateLimiterConfig(ProceedingJoinPoint point, Annotation annotation);
 
 
 }

@@ -7,36 +7,36 @@ import org.fsj.chameleon.lang.cache.CacheRefreshManager;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class AbsCacheFactory <T, P > implements CacheFactory<T,  P>,  Refreshable<Map<String,T>>  {
+public abstract class AbsCacheFactory <T,P> implements CacheFactory<T,P>,  Refreshable<Map<String,P>>  {
 
-    private  CacheRefreshManager<Map<String,T>> cacheRefreshManager = CacheRefreshManager.getInstance();
+    private  CacheRefreshManager<Map<String,P>> cacheRefreshManager = CacheRefreshManager.getInstance();
 
-    private CacheFreshStore<T> cacheFreshStore  = CacheFreshStore.getInstance();
+    private CacheFreshStore<P> cacheFreshStore  = CacheFreshStore.getInstance();
 
 
     public AbsCacheFactory() {
         cacheRefreshManager.addRefreshListener(this);
     }
 
+
     @Override
-    public void refresh(Map<String, T> map) {
+    public void refresh(Map<String, P> map) {
         map.forEach((s, t) -> cacheFreshStore.put(s,t));
     }
 
 
     @Override
-    public T get(CacheFactoryParams<P> params) {
-        final String cacheKey = params.getCacheKey();
-        T t = cacheFreshStore.get(cacheKey);
-        if (Objects.isNull(t)){
-            t = create(params);
-            cacheFreshStore.put(cacheKey,t);
+    public P get(T t) {
+        final String cacheKey = getCacheKey(t);
+        P p = cacheFreshStore.get(cacheKey);
+        if (Objects.isNull(p)){
+            p = create(t);
+            cacheFreshStore.put(cacheKey,p);
         }
-        return t;
+        return p;
     }
 
-
-    public abstract T create(FactoryParams<P> params);
+    public abstract P create(T t);
 
 
 

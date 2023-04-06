@@ -13,8 +13,7 @@ import java.util.Arrays;
 public class SentinelRateLimiterFactory extends AbsRateLimiterFactory {
 
     @Override
-    public CRateLimiter createRateLimiter(FactoryParams<RateLimiterConfig> params) {
-        final RateLimiterConfig createParams = params.getCreateParams();
+    public CRateLimiter createRateLimiter(RateLimiterConfig createParams) {
         init(createParams);
         return new SentinelRateLimiter(createParams.getKey());
     }

@@ -6,7 +6,7 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
 
 import java.util.concurrent.TimeUnit;
 
-public class SentinelRateLimiter implements CRateLimiter {
+public class SentinelRateLimiter extends AbsCRateLimiter {
 
     private String sourceName;
 
@@ -14,24 +14,21 @@ public class SentinelRateLimiter implements CRateLimiter {
         this.sourceName = sourceName;
     }
 
+
     @Override
-    public boolean tryAcquire(long timeout, TimeUnit unit) throws BlockException {
+    public boolean doTryAcquire(long timeout, TimeUnit unit) {
         doAcquire();
         return true;
     }
 
-
-    @Override
-    public void acquire() throws BlockException {
-        doAcquire();
-    }
-
-    private void doAcquire() throws BlockException {
-         Entry entry = null;
-        try  {
+    public void doAcquire() {
+        Entry entry = null;
+        try {
             entry = SphU.entry(sourceName);
-        }finally {
-            if (entry!=null){
+        } catch (BlockException e) {
+            e.printStackTrace();
+        } finally {
+            if (entry != null) {
                 entry.exit();
             }
         }

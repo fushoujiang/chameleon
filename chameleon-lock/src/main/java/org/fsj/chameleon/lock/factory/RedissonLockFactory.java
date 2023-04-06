@@ -1,6 +1,5 @@
 package org.fsj.chameleon.lock.factory;
 
-import org.fsj.chameleon.lang.factory.FactoryParams;
 import org.fsj.chameleon.lock.entity.LockConfig;
 import org.redisson.Redisson;
 
@@ -19,10 +18,7 @@ public class RedissonLockFactory extends AbsLockFactory {
 
 
     @Override
-    public Lock createLock(FactoryParams<LockConfig> params) {
-        final LockConfig lockConfig = params.getCreateParams();
+    public Lock create(LockConfig lockConfig) {
         return lockConfig.isFair() ? redisson.getFairLock(lockConfig.getLockKey()) : redisson.getLock(lockConfig.getLockKey());
     }
-
-
 }

@@ -4,7 +4,6 @@ import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 import org.fsj.chameleon.lang.convert.Converter;
-import org.fsj.chameleon.lang.factory.CacheFactoryParams;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +16,7 @@ public abstract class AbsNacosConfigManager<T> extends AbsConfigManager<T> imple
     private ConfigService configService;
 
 
-    public AbsNacosConfigManager(CacheFactoryParams<T> cacheFactoryParams, Converter<String, T> converter, ConfigService configService) {
-        super(cacheFactoryParams);
+    public AbsNacosConfigManager( Converter<String, T> converter, ConfigService configService) {
         this.converter = converter;
         this.configService = configService;
     }

@@ -20,14 +20,13 @@ public class RedissonRateLimiterFactory extends AbsRateLimiterFactory {
     }
 
 
-    public RedissonRateLimiterFactory(ConfigManager<FactoryParams<RateLimiterConfig>> manager, RedissonClient redisson) {
+    public RedissonRateLimiterFactory(ConfigManager<RateLimiterConfig> manager, RedissonClient redisson) {
         super(manager);
         this.redisson = redisson;
     }
 
     @Override
-    public CRateLimiter createRateLimiter(FactoryParams<RateLimiterConfig> params) {
-        final RateLimiterConfig rateLimiterConfig = params.getCreateParams();
+    public CRateLimiter createRateLimiter(RateLimiterConfig rateLimiterConfig) {
         RRateLimiter rateLimiter = redisson.getRateLimiter(rateLimiterConfig.getGroup() + ":" + rateLimiterConfig.getKey());
         rateLimiter.setRate(rateLimiterConfig.isCluster() ? RateType.OVERALL : RateType.PER_CLIENT, rateLimiterConfig.getPerSecond(), 1, RateIntervalUnit.SECONDS);
         return new CRedissonRateLimiter(rateLimiter);

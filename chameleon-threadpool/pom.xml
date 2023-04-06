@@ -24,6 +24,10 @@
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.fsj</groupId>
+            <artifactId>chameleon-core</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

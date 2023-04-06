@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.RateLimiter;
 
 import java.util.concurrent.TimeUnit;
 
-public class GuavaRateLimiter implements CRateLimiter{
+public class GuavaRateLimiter extends AbsCRateLimiter{
 
     private RateLimiter rateLimiter;
 
@@ -13,12 +13,13 @@ public class GuavaRateLimiter implements CRateLimiter{
     }
 
     @Override
-    public boolean tryAcquire(long timeout, TimeUnit unit) {
+    public boolean doTryAcquire(long timeout, TimeUnit unit) {
         return rateLimiter.tryAcquire(timeout,unit);
     }
 
     @Override
-    public void acquire() {
+    public void doAcquire() {
         rateLimiter.acquire();
     }
+
 }

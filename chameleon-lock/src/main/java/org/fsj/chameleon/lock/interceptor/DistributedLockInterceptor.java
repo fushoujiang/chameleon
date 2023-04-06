@@ -6,7 +6,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.fsj.chameleon.lock.DistributedLock;
 import org.fsj.chameleon.lock.entity.LockConfig;
 import org.fsj.chameleon.lock.factory.AbsLockFactory;
-import org.fsj.chameleon.lock.factory.LockConfigFactoryParams;
 import org.fsj.chameleon.lock.util.LockUtils;
 
 import java.lang.annotation.Annotation;
@@ -27,7 +26,7 @@ public class DistributedLockInterceptor extends AbsLockInterceptor{
         return lockAround(joinPoint,distributedLock);
     }
     @Override
-    public LockConfigFactoryParams params2LockConfig(ProceedingJoinPoint joinPoint, Annotation annotation) {
+    public LockConfig params2LockConfig(ProceedingJoinPoint joinPoint, Annotation annotation) {
         DistributedLock distributedLock = (DistributedLock) annotation;
         final LockConfig lockConfig = new LockConfig()
                 .setLockPrefix(distributedLock.lockPrefix())
@@ -36,6 +35,6 @@ public class DistributedLockInterceptor extends AbsLockInterceptor{
                 .setLockFailMethod(distributedLock.lockFailMethod())
                 .setTimeout(distributedLock.timeout());
         lockConfig.setLockKey(LockUtils.getLockKey(joinPoint.getArgs(),lockConfig));
-        return new LockConfigFactoryParams(lockConfig);
+        return lockConfig;
     }
 }

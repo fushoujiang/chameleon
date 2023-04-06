@@ -6,7 +6,6 @@ import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.google.common.base.Strings;
 import org.fsj.chameleon.datasource.manager.AbsConfigManager;
 import org.fsj.chameleon.lang.convert.Converter;
-import org.fsj.chameleon.lang.factory.CacheFactoryParams;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +20,7 @@ public abstract class AbsApolloConfigManager<T> extends AbsConfigManager<T> impl
 
     private Converter<String ,T> configPropertyTConverter;
 
-    public AbsApolloConfigManager(CacheFactoryParams<T> cacheFactoryParams, Config config, Converter<ConfigChangeEvent, List<T>> apolloChangeConvert, Converter<String, T> configPropertyTConverter) {
-        super(cacheFactoryParams);
+    public AbsApolloConfigManager( Config config, Converter<ConfigChangeEvent, List<T>> apolloChangeConvert, Converter<String, T> configPropertyTConverter) {
         this.config = config;
         this.apolloChangeConvert = apolloChangeConvert;
         this.configPropertyTConverter = configPropertyTConverter;

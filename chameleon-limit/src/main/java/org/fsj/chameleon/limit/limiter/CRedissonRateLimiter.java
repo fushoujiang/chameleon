@@ -4,7 +4,7 @@ import org.redisson.api.RRateLimiter;
 
 import java.util.concurrent.TimeUnit;
 
-public class CRedissonRateLimiter implements CRateLimiter{
+public class CRedissonRateLimiter extends AbsCRateLimiter{
 
     private RRateLimiter rateLimiter ;
 
@@ -13,12 +13,12 @@ public class CRedissonRateLimiter implements CRateLimiter{
     }
 
     @Override
-    public boolean tryAcquire(long timeout, TimeUnit unit) {
-        return rateLimiter.tryAcquire(timeout,unit);
-    }
+    public boolean doTryAcquire(long timeout, TimeUnit unit) {
+        return rateLimiter.tryAcquire(timeout,unit);    }
 
     @Override
-    public void acquire() {
+    public void doAcquire() {
         rateLimiter.acquire();
+
     }
 }

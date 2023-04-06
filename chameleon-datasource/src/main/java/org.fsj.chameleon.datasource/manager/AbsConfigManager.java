@@ -3,17 +3,14 @@ package org.fsj.chameleon.datasource.manager;
 
 import org.fsj.chameleon.lang.cache.CacheFreshStore;
 import org.fsj.chameleon.lang.cache.CacheRefreshManager;
-import org.fsj.chameleon.lang.factory.CacheFactoryParams;
 
 import java.util.Map;
 import java.util.Objects;
 
 public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
-    private CacheFactoryParams<T> cacheFactoryParams ;
 
-    public AbsConfigManager(CacheFactoryParams<T> cacheFactoryParams) {
-        this.cacheFactoryParams = cacheFactoryParams;
+    public AbsConfigManager() {
         cacheRefreshManager.addRefreshListener(this);
         cacheRefreshManager.addRefreshListener(cacheFreshStore);
     }
@@ -38,10 +35,11 @@ public abstract class AbsConfigManager<T> implements ConfigAbleManager<T> {
 
     @Override
     public T getConfig(T t) {
-         T result = cacheFreshStore.get(cacheFactoryParams.getCacheKey());
+        final String key = buildCacheKey(t);
+        T result = cacheFreshStore.get(key);
         if (Objects.isNull(result)){
             result = loadFromDateSource(t);
-            cacheFreshStore.put(cacheFactoryParams.getCacheKey(),t);
+            cacheFreshStore.put(key,t);
         }
         return result;
     }
